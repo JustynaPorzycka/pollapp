@@ -6,6 +6,7 @@ defmodule PollAppWeb.ShowTest do
 
   @user1 "username1"
   @user2 "username2"
+  @question "What is your favorite framework?"
 
   setup %{conn: conn} do
     clear_data()
@@ -33,6 +34,11 @@ defmodule PollAppWeb.ShowTest do
       show_live
       |> element("button[phx-value-option-id='#{option.id}']", "Vote")
       |> render_click()
+
+      assert_receive %Phoenix.Socket.Broadcast{
+        topic: "polls_topic",
+        event: "new_vote_event"
+      }
 
       updated_poll = PollApp.Polls.get_poll(poll.id)
       assert updated_poll.options |> Enum.any?(fn option -> option.votes > 0 end)
@@ -69,6 +75,22 @@ defmodule PollAppWeb.ShowTest do
 
       # The "Delete Poll" button should NOT be visible
       refute show_live |> has_element?("button", "Delete Poll")
+    end
+
+    test "new poll event", %{conn: conn, poll: poll} do
+      conn2 = log_in_user(build_conn(), @user2)
+
+      {:ok, _user2_live, _html2} = live(conn2, ~p"/polls/#{poll.id}")
+      {:ok, user1_live, _html2} = live(conn, ~p"/polls/new")
+
+      user1_live
+      |> form("#poll-form", %{"poll" => %{"question" => @question}})
+      |> render_submit()
+
+      assert_receive %Phoenix.Socket.Broadcast{
+        topic: "polls_topic",
+        event: "new_poll_event"
+      }
     end
 
     test "poll results update", %{conn: conn, poll: poll} do
@@ -134,5 +156,23 @@ defmodule PollAppWeb.ShowTest do
       # The vote count should remain 1, as second vote is not allowed
       assert Enum.find(final_poll.options, &(&1.id == option.id)).votes == 1
     end
+
+    test "chart updates after voting", %{conn: conn, poll: poll} do
+      {:ok, show_live, _html} = live(conn, ~p"/polls/#{poll.id}")
+
+      option = hd(poll.options)
+
+      initial_chart_svg = show_live |> element("#poll-chart") |> render()
+
+      show_live
+      |> element("button[phx-value-option-id='#{option.id}']", "Vote")
+      |> render_click()
+
+      updated_chart_svg = show_live |> element("#poll-chart") |> render()
+
+      assert initial_chart_svg != updated_chart_svg
+    end
+
+
   end
 end
