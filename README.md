@@ -1,12 +1,12 @@
 # PollApp
 
-Simple polling application built using Phoenix LiveView. This application allows users to create and vote in polls, with real-time updates of the poll results. It does not rely on external databases or disk storage and stores all data in-memory using Erlang Term Storage (ETS). The application is designed to handle multiple users interacting concurrently without blocking each other.
+Simple polling application built using Phoenix LiveView. This application allows users to create and vote in polls, with real-time updates of the poll results. It stores all data in-memory using Erlang Term Storage (ETS). The application is designed to handle multiple users interacting concurrently without blocking each other.
 
 ## Features
 
- **User Management:** Users can create an account by entering a username.  This functionality is implemented based on [`phx_gen_auth`](https://github.com/aaronrenner/phx_gen_auth/tree/master) template, which provides a basic authentication system.
- 
- **Poll Management:** Users can create new polls, with options to vote on.
+**User Management:** Users can create an account by entering a username.  This functionality is implemented based on [`phx_gen_auth`](https://github.com/aaronrenner/phx_gen_auth/tree/master) template, which provides a basic authentication system.
+
+**Create Polls:** Users can create new polls with multiple voting options.
  
 **Voting:** Users can vote on existing polls. Each user can vote only once per poll.
 
@@ -37,19 +37,18 @@ The GenServer for each poll is responsible for ensuring atomicity — meaning th
 
 **Scalability:** The current implementation is designed for small-scale applications. While ETS is highly efficient for in-memory storage and concurrent access, it may not be suitable for scaling to large datasets or multi-node setups.
 
-**Concurrency and Atomic Operations:** The application uses a GenServer to synchronize operations such as voting. This ensures that operations on polls are atomic, meaning they are handled sequentially, preventing race conditions between users. This is crucial when multiple users interact with the same poll concurrently. While GenServer synchronization ensures consistency, it can become a bottleneck under large number of operations on one poll.
+**Concurrency and Atomic Operations:** Potential Bottleneck – Right now, each poll has a single GenServer that handles vote/delete operations. Because of that, operations on polls are atomic, preventing race conditions between users. This ensures consistency but could slow things down if many users interact with the same poll at once.
 
-An alternative approach to consider is using a GenServer per user (managing votes), which would reduce contention on a single poll process. However, I didn't explore this idea further due to time constraints and because I came up with this idea towards the end of the implementation.
+An alternative approach to consider is using a GenServer per user (managing votes), instead of per poll. However, I didn't explore this idea further since I came up with this idea towards the end of the implementation and wouldn't make it on time.
 
-**UI Simplicity:** I didn’t focus much on the UI, so it’s quite basic.
+**UI Simplicity:** I should've focus more on the UI, it’s quite basic.
 
 ## Tests
-The application includes unit tests that cover the core business functionality. Tests ensure that:
-- polls can be successfully created and are visible to other users in real-time
-- users can vote on polls, and the application handles voting logic as expected
+The app includes unit tests to make sure the core features work correctly:
+- Polls can be created and seen by other users in real time.
+- Users can vote, and the app handles voting logic correctly.
 
 Additionally
-- poll creators can delete polls, and the deletion is reflected across the application
-- tests also cover edge cases such as invalid poll creation, multiple users interacting with the same poll, and concurrent voting updates.
+- Poll creators can delete their polls, and those changes are reflected across the app.
 
 To run the tests, run `mix test`.
