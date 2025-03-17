@@ -84,6 +84,11 @@ defmodule PollAppWeb.PollLive.Show do
     end
   end
 
+  @impl true
+  def handle_info(%{topic: @polls_topic, payload: _state}, socket) do
+    {:noreply, socket}
+  end
+
   defp format_time(time) do
     year = time.year
     month = time.month |> pad_zero()
