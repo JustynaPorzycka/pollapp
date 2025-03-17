@@ -1,0 +1,40 @@
+<div>
+    <.header>
+    <%= @title %>
+    </.header>
+
+    <.simple_form id="poll-form" for={@form} phx-change="validate" phx-submit="save" phx-target={@myself}>
+    <.input type="text" field={@form[:question]} label="Question" />
+
+
+    <.inputs_for :let={f} field={@form[:options]}>
+        <div class="flex items-center space-x-2">
+        <.input type="text" field={f[:text]} />
+        <button
+            type="button" 
+            phx-click="remove_option" 
+            phx-value-index={f.index} 
+            phx-target={@myself}
+            class="bg-teal-500 hover:bg-teal-700 text-white py-2 px-4 rounded">
+            Remove
+        </button>
+        </div>
+    </.inputs_for>
+
+    <:actions>
+        <button 
+          type="button" 
+          phx-click="add_option" 
+          phx-target={@myself}
+          class="bg-teal-500 hover:bg-teal-700 text-white py-2 px-4 rounded">
+          Add Option
+        </button>
+        <button
+          phx-disable-with="Saving..."
+          class="bg-teal-500 hover:bg-teal-700 text-white py-2 px-4 rounded">
+          Save
+        </button>
+    </:actions>
+    </.simple_form>
+
+</div>
