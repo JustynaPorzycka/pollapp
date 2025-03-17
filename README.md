@@ -39,7 +39,7 @@ The GenServer for each poll is responsible for ensuring atomicity — meaning th
 
 **Concurrency and Atomic Operations:** Potential Bottleneck – Right now, each poll has a single GenServer that handles vote/delete operations. Because of that, operations on polls are atomic, preventing race conditions between users. This ensures consistency but could slow things down if many users interact with the same poll at once.
 
-An alternative approach to consider is using a GenServer per user (managing votes), instead of per poll. However, I didn't explore this idea further since I came up with this idea towards the end of the implementation and wouldn't make it on time.
+An alternative approach to consider is using a GenServer per user (managing votes), instead of per poll. However, I didn't explore this idea further since I came up with it towards the end of the implementation and wouldn't make it on time.
 
 **UI Simplicity:** I should've focus more on the UI, it’s quite basic.
 
