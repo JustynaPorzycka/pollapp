@@ -15,7 +15,7 @@ defmodule PollApp.Polls do
     case Poll.changeset(%Poll{}, params) |> Ecto.Changeset.apply_action(:update) do
       {:ok, poll} ->
         Storage.add_poll(poll)
-        PollSupervisor.start_poll(poll)
+        PollSupervisor.start_poll(poll.id)
         {:ok, poll}
       error -> error
     end

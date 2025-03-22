@@ -6,11 +6,11 @@ defmodule PollApp.PollSupervisorTest do
 
   describe "PollSupervisor" do
     test "starts a poll process successfully" do
-      poll = %Poll{id: "poll1", options: [], voters: []}
+      poll_id = "poll1"
 
-      {:ok, pid1} = PollSupervisor.start_poll(poll)
+      {:ok, pid1} = PollSupervisor.start_poll(poll_id)
 
-      [{pid2, nil}]= Registry.lookup(PollApp.PollRegistry, "poll1")
+      [{pid2, nil}]= Registry.lookup(PollApp.PollRegistry, poll_id)
 
       assert pid1 == pid2
     end
@@ -20,13 +20,13 @@ defmodule PollApp.PollSupervisorTest do
     end
 
     test "stops an existing poll process successfully" do
-      poll = %Poll{id: "poll2", options: [], voters: []}
+      poll_id = "poll2"
 
-      {:ok, _pid} = PollSupervisor.start_poll(poll)
+      {:ok, _pid} = PollSupervisor.start_poll(poll_id)
 
-      assert PollSupervisor.stop_poll("poll2") == :ok
+      assert PollSupervisor.stop_poll(poll_id) == :ok
 
-      assert PollSupervisor.stop_poll("poll2") == {:error, :not_found}
+      assert PollSupervisor.stop_poll(poll_id) == {:error, :not_found}
     end
   end
 end

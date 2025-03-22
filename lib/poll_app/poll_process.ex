@@ -15,8 +15,13 @@ defmodule PollApp.PollProcess do
 
   ## --- API ---
 
-  def start_link(%Poll{id: poll_id} = poll) do
-    GenServer.start_link(__MODULE__, poll, name: via_tuple(poll_id))
+  def start_link(poll_id) do
+    case Storage.get_poll(poll_id) do
+      nil ->
+        GenServer.start_link(__MODULE__, %Poll{id: poll_id}, name: via_tuple(poll_id))
+      %Poll{id: poll_id} = poll ->
+        GenServer.start_link(__MODULE__, poll, name: via_tuple(poll_id))
+    end
   end
 
   def vote(poll_id, option_id, user) do
