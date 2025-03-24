@@ -52,17 +52,26 @@ defmodule PollAppWeb.PollLive.Show do
 
   @impl true
   def handle_event("delete_poll", %{"poll-id" => id}, socket) do
-    case Polls.delete_poll(id) do
-      {:ok, :deleted} ->
-        PollAppWeb.Endpoint.broadcast(@polls_topic, @poll_deleted_event, %{poll_id: id})
+    cond do
+      socket.assigns.poll.created_by == socket.assigns.current_user ->
+        case Polls.delete_poll(id) do
+          {:ok, :deleted} ->
+            PollAppWeb.Endpoint.broadcast(@polls_topic, @poll_deleted_event, %{poll_id: id})
+            socket =
+              socket
+              |> push_navigate(to: "/polls")
+              |> put_flash(:info, "Poll deleted successfully")
+            {:noreply, socket}
+          {:error, _} ->
+            {:noreply, socket}
+        end
+      true ->
         socket =
           socket
           |> push_navigate(to: "/polls")
-          |> put_flash(:info, "Poll deleted successfully")
+          |> put_flash(:info, "You do not have permissions to delete this poll!")
         {:noreply, socket}
-      {:error, _} ->
-        {:noreply, socket}
-    end
+      end
   end
 
   @impl true
